@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Chat Room</title>
 </head>
 <body>
+    <div id="username-modal" class="modal">
+        <div class="modal-content">
+            <input type="text" id="username-input" placeholder="Enter your username">
+            <button id="username-submit">Join Chat</button>
+        </div>
+    </div>
 
+    <div class="chat-container" style="display:none;">
+        <div id="chat-box"></div>
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button id="send-button">Send</button>
+    </div>
 </body>
 </html>
