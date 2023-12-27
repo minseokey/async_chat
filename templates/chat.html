@@ -16,5 +16,51 @@
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-button">Send</button>
     </div>
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+        let username = '';
+        const chatContainer = document.querySelector(".chat-container");
+        const usernameModal = document.getElementById("username-modal");
+        const usernameInput = document.getElementById("username-input");
+        const usernameSubmit = document.getElementById("username-submit");
+
+        usernameModal.style.display = "flex";
+
+        usernameSubmit.addEventListener("click", () => {
+            username = usernameInput.value.trim();
+            if(username) {
+                chatContainer.style.display = "block";
+                usernameModal.style.display = "none";
+                connectWebSocket();
+            } else {
+                alert("Please enter a username");
+            }
+        });
+
+        function connectWebSocket() {
+            const socket = new WebSocket("ws://localhost:8080/ws");
+            const chatBox = document.getElementById("chat-box");
+            const messageInput = document.getElementById("message-input");
+            const sendButton = document.getElementById("send-button");
+
+            socket.onopen = () => {
+                socket.send(username);
+            };
+
+            socket.onmessage = function(event) {
+                const messageData = JSON.parse(event.data);
+                chatBox.innerHTML += `<div style="text-align: left"> [${messageData.time}] ${messageData.user}: ${messageData.data}</div>`;
+            };
+
+            sendButton.addEventListener("click", () => {
+                const message = messageInput.value;
+                const raw_time = new Date()
+                const time = raw_time.getHours().toString() + ":" + raw_time.getMinutes().toString()
+                socket.send(JSON.stringify({ user: username, data: message ,time:time}));
+                messageInput.value = "";
+            });
+        }
+    });
+</script>
 </body>
 </html>
