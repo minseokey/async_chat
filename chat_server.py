@@ -1,7 +1,15 @@
 from aiohttp import web
-
+import logging
 
 routes = web.RouteTableDef()
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
 
 @routes.get("/")
 async def index(request):
@@ -23,6 +31,9 @@ async def websoket_handler(request):
     user = await ws.receive_str()
     if user not in request.app['sockets']:
         request.app['sockets'][user] = ws
+    else:
+        logging.error("not allowed same name")
+        return ws
 
     # 2. 채팅단계
     async for msg in ws:
@@ -30,9 +41,13 @@ async def websoket_handler(request):
             msg_json = msg.json()
             for socket in request.app['sockets'].keys():
                 await request.app['sockets'][socket].send_json(msg_json)
+        else:
+            logging.error("ws connection closed with exception {}".format(ws.exception()))
+            return ws
 
     # 3. 종료단계
     del request.app['sockets'][user]
+    logging.info("{} users in chatroom".format(len(request.app['sockets'].keys())))
     return ws
 
 async def init():
