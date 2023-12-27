@@ -41,5 +41,6 @@ async def init():
     app["sockets"] = dict()
     return app
 
+
 if __name__ == "__main__":
     web.run_app(init())
