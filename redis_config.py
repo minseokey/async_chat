@@ -3,7 +3,7 @@ import os
 
 from redis import asyncio as aioredis
 
-redis_client = aioredis.Redis(host="localhost", port=6379)
+redis_client = aioredis.Redis(host=os.getenv("REDIS_HOST"), port=6379)
 
 # 곧바로 웹소켓을 이용하는것이 아닌, 웹소켓 -> 레디스 -> 웹소켓의 구조.
 

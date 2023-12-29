@@ -1,6 +1,9 @@
-from aiohttp import web
+import ipaddress
 import logging
+import os
+from aiohttp import web
 import redis_config
+import socket
 
 routes = web.RouteTableDef()
 
@@ -10,6 +13,13 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
+
+
+@routes.get("/config")
+async def socket_port(request):
+    websocket_port = os.getenv("WEBSOCKET_PORT", 8080)
+    logging.info("now port is {}".format(websocket_port))
+    return web.json_response({"wport": websocket_port})
 
 
 @routes.get("/")
