@@ -90,7 +90,8 @@
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-button">Send</button>
     </div>
-<script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", () => {
         let username = '';
         const chatContainer = document.querySelector(".chat-container");
@@ -110,9 +111,13 @@
                 alert("Please enter a username");
             }
         });
-
-        function connectWebSocket() {
-            const socket = new WebSocket("ws://localhost:8080/ws");
+        async function getConfig() {
+            const response = await fetch('/config');
+            return await response.json();
+        }
+        async function connectWebSocket() {
+            const config = await getConfig();
+            const socket = new WebSocket(`ws://3.95.219.181:${config.wport}/ws`); //여기에 aws 주소.
             const chatBox = document.getElementById("chat-box");
             const messageInput = document.getElementById("message-input");
             const sendButton = document.getElementById("send-button");
@@ -121,11 +126,13 @@
                 socket.send(username);
             };
 
+            // 소켓으로 받기 (onmessage)
             socket.onmessage = function(event) {
                 const messageData = JSON.parse(event.data);
                 chatBox.innerHTML += `<div style="text-align: left"> [${messageData.time}] ${messageData.user}: ${messageData.data}</div>`;
             };
 
+            // 소켓으로 보내기 (event_listener)
             sendButton.addEventListener("click", () => {
                 const message = messageInput.value;
                 const raw_time = new Date()
