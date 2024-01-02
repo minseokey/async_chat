@@ -101,7 +101,7 @@
 
         usernameModal.style.display = "flex";
 
-        usernameSubmit.addEventListener("click", () => {
+        usernameSubmit.addEventListener("click", () => {  //
             username = usernameInput.value.trim();
             if(username) {
                 chatContainer.style.display = "block";
@@ -111,23 +111,26 @@
                 alert("Please enter a username");
             }
         });
-        async function getConfig() {
+        async function getConfig() { // nginx 를 통해 서버별로 각각의 포트를 이용, 자신의 포트번호로 웹소켓 연결하기위해 환경변수를 서버로부터 받아온다.
             const response = await fetch('/config');
             return await response.json();
         }
+
         async function connectWebSocket() {
             const config = await getConfig();
-            const socket = new WebSocket(`ws://3.95.219.181:${config.wport}/ws`); //여기에 aws 주소.
+            const socket = new WebSocket(`ws://54.180.115.203:${config.wport}/ws`); //여기에 aws 주소, port, 주소는 받아오는 방법을 몰라서 그냥 넣었다.
+            // socket 이라는 새로운 웹소켓 객체를 만들어서 통신 시도.
             const chatBox = document.getElementById("chat-box");
             const messageInput = document.getElementById("message-input");
             const sendButton = document.getElementById("send-button");
 
-            socket.onopen = () => {
-                socket.send(username);
+            socket.onopen = () => { // 연결이 될때 자신의 포트번호를 띄워준다.
+                alert(`your port is ${config.wport}`);
+                socket.send(username); // 아까 서버에서 기다리던 그 이름을 넘겨주어 다음단계로 진행한다.
             };
 
             // 소켓으로 받기 (onmessage)
-            socket.onmessage = function(event) {
+            socket.onmessage = function(event) { // 서버에서 보내주는 메시지를 채팅박스 안에 띄워준다
                 const messageData = JSON.parse(event.data);
                 chatBox.innerHTML += `<div style="text-align: left"> [${messageData.time}] ${messageData.user}: ${messageData.data}</div>`;
             };
@@ -137,7 +140,7 @@
                 const message = messageInput.value;
                 const raw_time = new Date()
                 const time = raw_time.getHours().toString() + ":" + raw_time.getMinutes().toString()
-                socket.send(JSON.stringify({ user: username, data: message ,time:time}));
+                socket.send(JSON.stringify({ user: username, data: message ,time:time}));  // 받은 메시지에 현재 시간을 더해 웹소켓으로 전송한다.
                 messageInput.value = "";
             });
         }
